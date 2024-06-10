@@ -46,20 +46,36 @@ def homepage():
     """List all available routes"""
     return (
         f"Available Routes: <br/>"
-
+        f"----------------------------------------------------------------------------------------------------------------------------------------------------------------------<br/>"
+        f" <br/>"
+        f"This route provides information on the last 12 months of precipitation data in Hawaii from the most recent date recorded<br/>"
+        f" <br/>"
         f"/api/v1.0/precipitation<br/>"
-
+        f" <br/>"
+        f"----------------------------------------------------------------------------------------------------------------------------------------------------------------------<br/>"
+        f" <br/>"
+        f"This route provides the full list of stations this dataset has recorded within Hawaii<br/>"
+        f" <br/>"
         f"/api/v1.0/stations<br/>"
-
+        f" <br/>"
+        f"----------------------------------------------------------------------------------------------------------------------------------------------------------------------<br/>"
+        f" <br/>"
+        f" <br/>"
+        f"This route provides the last 12 months of temperature observation from this dataset's recorded most active station within Hawaii<br/>"
+        f" <br/>"
         f"/api/v1.0/tobs<br/>"
-
-        f"For the following two routes, input a start or start/end date In between 2010-01-01 and 2017-08-23 with a YYYY-MM-DD format. <br/>"
-
+        f" <br/>"
+        f"----------------------------------------------------------------------------------------------------------------------------------------------------------------------<br/>"
+        f" <br/>"
+        f"For the following two routes, input a start or start/end date in between '2010-01-01' and '2017-08-23' with a YYYY-MM-DD format. <br/>"
         f"For example: /api/v1.0/2012-12-27/2017-01-01 <br/>"
-
+        f" <br/>"
+        f"Start API route:<br/>"
         f"/api/v1.0/<start><br/>"
-
+        f" <br/>"
+        f"Start/End API route:<br/>"
         f"/api/v1.0/<start>/<end><br/>"
+        f" <br/>"
     )
 @app.route("/api/v1.0/precipitation")
 def precipitation():
@@ -71,7 +87,8 @@ def precipitation():
     recent_date_data = session.query(func.max(measures.date)).first()
     print(f"The most recent date is: {recent_date_data}")
     
-    recent_date = dt.datetime(2017, 8, 23)
+    recent_date_str = recent_date_data[0]
+    recent_date = dt.datetime.strptime(recent_date_str, '%Y-%m-%d')
 
     # Calculate the date one year from the last date in data set.- I used 366 days in order to include 2016-08-23
     year_before = recent_date - dt.timedelta(days = 366)
@@ -117,7 +134,9 @@ def tobs():
     order_by(measures.date.desc()).first()[0]
     print(f"The most recent date for the most active station is: {most_tobs_recent_date}")
 
-    recent_tobs_date = dt.datetime(2017, 8, 18)
+    recent_tobs_date_str = most_tobs_recent_date
+
+    recent_tobs_date = dt.datetime.strptime(recent_tobs_date_str, '%Y-%m-%d')
 
     # Calculate the date one year from the most recent date for the most active station.
     year_ago = recent_tobs_date - dt.timedelta(days = 366)
@@ -157,6 +176,7 @@ def start(start):
 
     session.close()
 
+    # Formatting returned information into a dictionary with the provided labels
     start_stats = {}
     for info in start_date_info:
         date = info[0]
@@ -189,6 +209,7 @@ def end(start, end):
 
     session.close()
 
+    # Formatting returned information into a dictionary with the provided labels
     start_end_stats = {}
     for info in start_end_date_info:
         date = info[0]
